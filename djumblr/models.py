@@ -42,7 +42,7 @@ class Regular(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
     
 class Photo(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, editable=False)
     source = models.URLField(blank=True)
     photo = models.ImageField(upload_to="/photos", blank=True)
     caption = models.TextField(blank=True)
@@ -53,6 +53,17 @@ class Photo(models.Model):
     
     class Meta:
         ordering = ['-pub_date']
+
+    def save(self):
+        user = settings.TUMBLR_USERS[self.user.username]
+        api = Api(user['tumblr_user'] + ".tumblr.com",
+                  user['email'],
+                  user['password']
+        )
+        if not self.id:
+            post = api.write_photo(source=self.source, caption=self.caption, click_through_url=self.click_through_url)
+            self.id = post['id']
+        super(Photo, self).save()
 
     def __unicode__(self):
         return "Photo"
@@ -65,7 +76,7 @@ class Photo(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
         
 class Quote(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, editable=False)
     quote = models.TextField()
     source = models.TextField(blank=True)
 
@@ -74,6 +85,17 @@ class Quote(models.Model):
     
     class Meta:
         ordering = ['-pub_date']
+
+    def save(self):
+        user = settings.TUMBLR_USERS[self.user.username]
+        api = Api(user['tumblr_user'] + ".tumblr.com",
+                  user['email'],
+                  user['password']
+        )
+        if not self.id:
+            post = api.write_quote(quote=self.quote, source=self.source)
+            self.id = post['id']
+        super(Quote, self).save()
 
     def __unicode__(self):
         return "Quote"
@@ -96,6 +118,17 @@ class Link(models.Model):
 
     class Meta:
         ordering = ['-pub_date']
+        
+    def save(self):
+        user = settings.TUMBLR_USERS[self.user.username]
+        api = Api(user['tumblr_user'] + ".tumblr.com",
+                  user['email'],
+                  user['password']
+        )
+        if not self.id:
+            post = api.write_link(name=self.name, url=self.url, description=self.description)
+            self.id = post['id']
+        super(Link, self).save()
         
     def __unicode__(self):
         if self.name:
