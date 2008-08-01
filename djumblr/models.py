@@ -8,11 +8,11 @@ class Regular(models.Model):
     title = models.CharField(max_length=250, blank=True)
     body = models.TextField()
     
-    pubdate = models.DateTimeField(default=datetime.datetime.now)
+    pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
     
     class Meta:
-        ordering = ['-pubdate']
+        ordering = ['-pub_date']
     
     def __unicode__(self):
         if self.title:
@@ -21,8 +21,12 @@ class Regular(models.Model):
             return "Regular"
         
     def get_absolute_url(self):
-        return "/regular/%d" % self.id
-
+        return ('djumblr_regular_detail', (), { 'year': self.pub_date.strftime("%Y"),
+                                                'month': self.pub_date.strftime("%b").lower(),
+                                                'day': self.pub_date.strftime("%d"),
+                                                'slug': self.slug })
+    get_absolute_url = models.permalink(get_absolute_url)
+    
 class Photo(models.Model):
     id = models.IntegerField(primary_key=True)
     source = models.URLField(blank=True)
@@ -30,35 +34,42 @@ class Photo(models.Model):
     caption = models.TextField(blank=True)
     click_through_url=models.URLField(blank=True)
 
-    pubdate = models.DateTimeField()
+    pub_date = models.DateTimeField()
     user = models.ForeignKey(User)
     
     class Meta:
-        ordering = ['-pubdate']
+        ordering = ['-pub_date']
 
     def __unicode__(self):
         return "Photo"
 
     def get_absolute_url(self):
-        return "/photo/%d" % self.id
+        return ('djumblr_photo_detail', (), { 'year': self.pub_date.strftime("%Y"),
+                                              'month': self.pub_date.strftime("%b").lower(),
+                                              'day': self.pub_date.strftime("%d"),
+                                              'slug': self.slug })
+    get_absolute_url = models.permalink(get_absolute_url)
         
 class Quote(models.Model):
     id = models.IntegerField(primary_key=True)
     quote = models.TextField()
     source = models.TextField(blank=True)
 
-    pubdate = models.DateTimeField(default=datetime.datetime.now)
+    pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
     
     class Meta:
-        ordering = ['-pubdate']
+        ordering = ['-pub_date']
 
     def __unicode__(self):
         return "Quote"
 
     def get_absolute_url(self):
-        return "/quote/%d" % self.id
-
+        return ('djumblr_quote_detail', (), { 'year': self.pub_date.strftime("%Y"),
+                                              'month': self.pub_date.strftime("%b").lower(),
+                                              'day': self.pub_date.strftime("%d"),
+                                              'slug': self.slug })
+    get_absolute_url = models.permalink(get_absolute_url)
 
 class Link(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -66,11 +77,11 @@ class Link(models.Model):
     url = models.URLField()
     description = models.TextField(blank=True)
 
-    pubdate = models.DateTimeField(default=datetime.datetime.now)
+    pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
 
     class Meta:
-        ordering = ['-pubdate']
+        ordering = ['-pub_date']
         
     def __unicode__(self):
         if self.name:
@@ -79,18 +90,22 @@ class Link(models.Model):
             return "Link"
 
     def get_absolute_url(self):
-        return "/link/%d" % self.id
+        return ('djumblr_link_detail', (), { 'year': self.pub_date.strftime("%Y"),
+                                             'month': self.pub_date.strftime("%b").lower(),
+                                             'day': self.pub_date.strftime("%d"),
+                                             'slug': self.slug })
+    get_absolute_url = models.permalink(get_absolute_url)
 
 class Conversation(models.Model):
     id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=500, blank=True)
     conversation = models.TextField()
 
-    pubdate = models.DateTimeField(default=datetime.datetime.now)
+    pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
 
     class Meta:
-        ordering = ['-pubdate']
+        ordering = ['-pub_date']
 
     def __unicode__(self):
         if self.title:
@@ -98,8 +113,13 @@ class Conversation(models.Model):
         else:
             return "Conversation"
 
+
     def get_absolute_url(self):
-        return "/conversation/%d" % self.id
+        return ('djumblr_conversation_detail', (), { 'year': self.pub_date.strftime("%Y"),
+                                                     'month': self.pub_date.strftime("%b").lower(),
+                                                     'day': self.pub_date.strftime("%d"),
+                                                     'slug': self.slug })
+    get_absolute_url = models.permalink(get_absolute_url)
         
 class Video(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -108,22 +128,39 @@ class Video(models.Model):
     title = models.CharField(blank=True, max_length=250)
     caption = models.TextField(blank=True)
 
-    pubdate = models.DateTimeField(default=datetime.datetime.now)
+    pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
     
     class Meta:
-        ordering = ['-pubdate']        
+        ordering = ['-pub_date']        
     
     def __unicode__(self):
         return "Video"
 
     def get_absolute_url(self):
-        return "/video/%d" % self.id
-
+        return ('djumblr_video_detail', (), { 'year': self.pub_date.strftime("%Y"),
+                                              'month': self.pub_date.strftime("%b").lower(),
+                                              'day': self.pub_date.strftime("%d"),
+                                              'slug': self.slug })
+    get_absolute_url = models.permalink(get_absolute_url)
+    
 class Audio(models.Model):
     id = models.IntegerField(primary_key=True)
     data = models.FileField(upload_to='/audio')
     caption = models.TextField(blank=True)
     
-    pubdate = models.DateTimeField(default=datetime.datetime.now)
+    pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
+    
+    class Meta:
+        ordering = ['-pub_date']        
+    
+    def __unicode__(self):
+        return "Audio"
+
+    def get_absolute_url(self):
+        return ('djumblr_audio_detail', (), { 'year': self.pub_date.strftime("%Y"),
+                                              'month': self.pub_date.strftime("%b").lower(),
+                                              'day': self.pub_date.strftime("%d"),
+                                              'slug': self.slug })
+    get_absolute_url = models.permalink(get_absolute_url)
