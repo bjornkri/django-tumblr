@@ -13,6 +13,7 @@ class Regular(models.Model):
     
     class Meta:
         ordering = ['-pub_date']
+        verbose_name_plural = "Regular"
     
     def __unicode__(self):
         if self.title:
@@ -153,7 +154,8 @@ class Audio(models.Model):
     user = models.ForeignKey(User)
     
     class Meta:
-        ordering = ['-pub_date']        
+        ordering = ['-pub_date']
+        verbose_name_plural = "Audio"
     
     def __unicode__(self):
         return "Audio"
