@@ -1,0 +1,19 @@
+djumblr: Tumblr for Django.
+===========================
+
+Instructions:
+
+Download djumblr and put it on your pythonpath. Include it in your INSTALLED_APPS, and syncdb.
+You now have models for tumblr content! Currently, the syncing is one-way: from tumblr to djumblr.
+To sync, you first need to define the user(s) that have tumblr accounts. This is done with the
+TUMBLR_USERS settings in settings.py.
+
+An example (from djumblr.scripts.populate_all()):
+	John has the username 'john' on his django website, but 'ignorantcarrot' on tumblr.
+	His TUMBLR_USERS would be:
+
+	TUMBLR_USERS = [{ 'tumblr_user': 'ignorantcarrot',
+	                  'local_user': 'john' }, ]
+
+Alternatively, run populate_models(tumblr_user, user) from the scripts module, where 'tumblr_user'
+is a string containing the username of the tumblr user, and 'user' is a User object.
