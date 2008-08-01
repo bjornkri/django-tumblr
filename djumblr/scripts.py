@@ -120,10 +120,10 @@ def populate_all():
 
     '''
     
-    for tumblr_user in settings.TUMBLR_USERS:
-        user = User.objects.get(username__exact=tumblr_user['local_user'])
+    for username, tumblr_info in settings.TUMBLR_USERS.iteritems():
+        user = User.objects.get(username__exact=username)
         
-        populate_models(tumblr_user['tumblr_user'], user)
+        populate_models(tumblr_info['tumblr_user'], user)
         
 if __name__ == "__main__":
     populate_all()

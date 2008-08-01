@@ -1,7 +1,9 @@
 import datetime
 
-from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
+from django.db import models
+from tumblr import Api
 
 class Regular(models.Model):
     id = models.IntegerField(primary_key=True)
@@ -14,6 +16,17 @@ class Regular(models.Model):
     class Meta:
         ordering = ['-pub_date']
         verbose_name_plural = "Regular"
+        
+    def save(self):
+        user = settings.TUMBLR_USERS[self.user.username]
+        api = Api(user['tumblr_user'] + ".tumblr.com",
+                  user['email'],
+                  user['password']
+        )
+        if not self.id:
+            post = api.write_regular(self.title, self.body)
+            self.id = post['id']
+        super(Regular, self).save()
     
     def __unicode__(self):
         if self.title:
