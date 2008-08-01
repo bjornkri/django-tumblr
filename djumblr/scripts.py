@@ -106,17 +106,28 @@ def populate_all():
     '''
     Loops through all the users defined in TUMBLR_USERS in the main settings file.
     
-    TUMBLR_USERS should be a list of dictionaries, each containing a 'tumblr_user' and
-    a 'local_user' key. 'tumblr_user' should be a tumblr user name, and 'local_user'
-    the exact username of a user. (Optionally, the tumblr user's 'email'' and 'password'
-    can be included, but these are only used for posting.)
+    TUMBLR_USERS should be a dictionary of dictionaries, each with a django User.username
+    as key, and at least a 'tumblr_user'. (Optionally, the tumblr user's 'email'' and 
+    'password' can be included, but these are only used for posting.)
     
     Example:
     John has the username 'john' on his django website, but 'ignorantcarrot' on tumblr.
     His TUMBLR_USERS would be:
 
-    TUMBLR_USERS = [{ 'tumblr_user': 'ignorantcarrot',
-                      'local_user': 'john' }, ]
+    TUMBLR_USERS = { 'john': 
+                            { 'tumblr_user': 'ignorantcarrot', }
+                   }
+                 
+    If he wants to use the django site both for posting and syncing, he would have to 
+    update the TUMBLR_USERS variable with the email address and password he uses to
+    log in to tumblr.com:
+    
+    TUMBLR_USERS = { 'john': 
+                            { 'tumblr_user': 'ignorantcarrot',
+                              'email': 'john.carrot@fullbladder.net',
+                              'password': 'secret',
+                            }
+                   }
 
     '''
     
