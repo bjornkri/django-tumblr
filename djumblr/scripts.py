@@ -1,11 +1,9 @@
 import datetime
-import urllib2
 
-from BeautifulSoup import BeautifulStoneSoup
 from django.conf import settings
 from django.contrib.auth.models import User
 from djumblr.models import Regular, Photo, Quote, Link, Conversation, Audio, Video, ConversationLine
-from xml.sax.saxutils import unescape
+from tumblr import Api
 
 def populate_models(tumblr_user, user):
     '''
@@ -13,61 +11,56 @@ def populate_models(tumblr_user, user):
     with data from 'tumblr_user'.tumblr.com, and associates the entries with 'user'.
     '''
     
-    feed_url = "http://%s.tumblr.com/api/read" % tumblr_user
-    xml = urllib2.urlopen(feed_url)
-    soup = BeautifulStoneSoup(xml)
-    tumbls = soup.findAll('post')
-    for tumbl in tumbls:
+    tumbls = Api(tumblr_user + ".tumblr.com")
+    for tumbl in tumbls.read():
         # Common to all models
         id = tumbl['id']
-        pub_date = datetime.datetime.fromtimestamp(float(tumbl['unix-timestamp']))
+        pub_date = datetime.datetime.strptime(tumbl['date-gmt'], '%Y-%m-%d %H:%M:%S %Z')
         
         # 'Regular' objects.
         if tumbl['type'] == "regular":
-            if tumbl.find('regular-title'):
-                title = tumbl.find('regular-title').contents[0]
+            if tumbl['regular-title']:
+                title = tumbl['regular-title']
             else:
                 title = ""
-            body = tumbl.find('regular-body').contents[0]
-            m = Regular(id=id, pub_date=pub_date, user=user, title=title, body=unescape(body))
+            body = tumbl['regular-body']
+            m = Regular(id=id, pub_date=pub_date, user=user, title=title, body=body)
         
         # 'Photo' objects.
         elif tumbl['type'] == "photo":
-            source = tumbl.findAll('photo-url')[1].contents[0]
-            if tumbl.find('click-through-url'):
-                click_through_url = tumbl.find('click-through-url').contents[0]
-            if tumbl.find('photo-caption'):
-                caption = tumbl.find('photo-caption').contents[0]
+            source = tumbl['photo-url-250']
+            if tumbl['photo-caption']:
+                caption = tumbl['photo-caption']
             else:
                 caption = ""
-            m = Photo(id=id, pub_date=pub_date, user=user, source=source, caption=unescape(caption))
+            m = Photo(id=id, pub_date=pub_date, user=user, source=source, caption=caption)
         
         # 'Quote' objects.
         elif tumbl['type'] == "quote":
-            quote = tumbl.find('quote-text').contents[0]
-            if tumbl.find('quote-source'):
-                source = tumbl.find('quote-source').contents[0]
+            quote = tumbl['quote-text']
+            if tumbl['quote-source']:
+                source = tumbl['quote-source']
             else:
                 source = ""
-            m = Quote(id=id, pub_date=pub_date, user=user, quote=unescape(quote), source=unescape(source))
+            m = Quote(id=id, pub_date=pub_date, user=user, quote=quote, source=source)
             
         # 'Link' objects.
         elif tumbl['type'] == "link":
-            if tumbl.find('link-text'):
-                name = tumbl.find('link-text').contents[0]
+            if tumbl['link-text']:
+                name = tumbl['link-text']
             else:
                 name = ""
-            url = tumbl.find('link-url').contents[0]
-            if tumbl.find('link-description'):
-                description = tumbl.find('link-description').contents[0]
+            url = tumbl['link-url']
+            if tumbl['link-description']:
+                description = tumbl['link-description']
             else:
                 description = ""
-            m = Link(id=id, pub_date=pub_date, user=user, name=name, url=url, description=unescape(description))
+            m = Link(id=id, pub_date=pub_date, user=user, name=name, url=url, description=description)
         
         # 'Conversation' objects.
         elif tumbl['type'] == "conversation":
-            if tumbl.find('conversation-title'):
-                title = tumbl.find('conversation-title').contents[0]
+            if tumbl['conversation-title']:
+                title = tumbl['conversation-title']
             else:
                 title = ""
             m = Conversation(id=id, pub_date=pub_date, user=user, title=title)
@@ -78,7 +71,7 @@ def populate_models(tumblr_user, user):
             except:
                 pass
                 
-            lines = tumbl.find('conversation-text').contents[0].split('&#13;')
+            lines = tumbl['conversation-text'].split('&#13;')
             for line in lines:
                 c = ConversationLine(conversation=m, line=line.strip())
                 c.save()
@@ -86,21 +79,21 @@ def populate_models(tumblr_user, user):
             
         # 'Video' objects.
         elif tumbl['type'] == "video":
-            embed = tumbl.find('video-player').contents[0]
-            if tumbl.find('video-caption'):
-                caption = tumbl.find('video-caption').contents[0]
+            embed = tumbl['video-player']
+            if tumbl['video-caption']:
+                caption = tumbl['video-caption']
             else:
                 caption = ""
-            m = Video(id=id, pub_date=pub_date, user=user, embed=unescape(embed), caption=unescape(caption))
+            m = Video(id=id, pub_date=pub_date, user=user, embed=embed, caption=caption)
         
         # 'Audio' objects.
         elif tumbl['type'] == "audio":
-            embed = tumbl.find('audio-player').contents[0]
-            if tumbl.find('audio-caption'):
-                caption = tumbl.find('audio-caption').contents[0]
+            embed = tumbl['audio-player']
+            if tumbl['audio-caption']:
+                caption = tumbl['audio-caption']
             else:
                 caption = ""
-            m = Audio(id=id, pub_date=pub_date, user=user, embed=unescape(embed), caption=unescape(caption))
+            m = Audio(id=id, pub_date=pub_date, user=user, embed=embed, caption=caption)
             
         # TODO: Raise error.
         else:
@@ -115,7 +108,8 @@ def populate_all():
     
     TUMBLR_USERS should be a list of dictionaries, each containing a 'tumblr_user' and
     a 'local_user' key. 'tumblr_user' should be a tumblr user name, and 'local_user'
-    the exact username of a user.
+    the exact username of a user. (Optionally, the tumblr user's 'email'' and 'password'
+    can be included, but these are only used for posting.)
     
     Example:
     John has the username 'john' on his django website, but 'ignorantcarrot' on tumblr.
