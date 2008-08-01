@@ -25,7 +25,7 @@ class Regular(models.Model):
         return ('djumblr_regular_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                                 'month': self.pub_date.strftime("%b").lower(),
                                                 'day': self.pub_date.strftime("%d"),
-                                                'slug': self.slug })
+                                                'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
 class Photo(models.Model):
@@ -48,7 +48,7 @@ class Photo(models.Model):
         return ('djumblr_photo_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                               'month': self.pub_date.strftime("%b").lower(),
                                               'day': self.pub_date.strftime("%d"),
-                                              'slug': self.slug })
+                                              'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
         
 class Quote(models.Model):
@@ -69,7 +69,7 @@ class Quote(models.Model):
         return ('djumblr_quote_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                               'month': self.pub_date.strftime("%b").lower(),
                                               'day': self.pub_date.strftime("%d"),
-                                              'slug': self.slug })
+                                              'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
 
 class Link(models.Model):
@@ -94,13 +94,12 @@ class Link(models.Model):
         return ('djumblr_link_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                              'month': self.pub_date.strftime("%b").lower(),
                                              'day': self.pub_date.strftime("%d"),
-                                             'slug': self.slug })
+                                             'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
 
 class Conversation(models.Model):
     id = models.IntegerField(primary_key=True)
     title = models.CharField(max_length=500, blank=True)
-    conversation = models.TextField()
 
     pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
@@ -114,14 +113,23 @@ class Conversation(models.Model):
         else:
             return "Conversation"
 
-
     def get_absolute_url(self):
         return ('djumblr_conversation_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                                      'month': self.pub_date.strftime("%b").lower(),
                                                      'day': self.pub_date.strftime("%d"),
-                                                     'slug': self.slug })
+                                                     'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
         
+class ConversationLine(models.Model):
+    line = models.CharField(max_length=250)
+    conversation = models.ForeignKey(Conversation)
+    
+    class Meta:
+        ordering = ['id']
+    
+    def __unicode__(self):
+        return self.line
+    
 class Video(models.Model):
     id = models.IntegerField(primary_key=True)
     embed = models.TextField(blank=True)
@@ -142,13 +150,15 @@ class Video(models.Model):
         return ('djumblr_video_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                               'month': self.pub_date.strftime("%b").lower(),
                                               'day': self.pub_date.strftime("%d"),
-                                              'slug': self.slug })
+                                              'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
 class Audio(models.Model):
     id = models.IntegerField(primary_key=True)
-    data = models.FileField(upload_to='/audio')
+    data = models.FileField(upload_to='/audio', blank=True)
+    embed = models.TextField(blank=True)
     caption = models.TextField(blank=True)
+    
     
     pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
@@ -164,5 +174,5 @@ class Audio(models.Model):
         return ('djumblr_audio_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                               'month': self.pub_date.strftime("%b").lower(),
                                               'day': self.pub_date.strftime("%d"),
-                                              'slug': self.slug })
+                                              'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
