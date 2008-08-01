@@ -121,7 +121,7 @@ class Conversation(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
         
 class ConversationLine(models.Model):
-    line = models.CharField(max_length=250)
+    line = models.CharField(max_length=250, core=True)
     conversation = models.ForeignKey(Conversation)
     
     class Meta:

@@ -13,9 +13,8 @@ def populate_models(tumblr_user, user):
     with data from 'tumblr_user'.tumblr.com, and associates the entries with 'user'.
     '''
     
-    # feed_url = "http://%s.tumblr.com/read/api" % tumblr_user
-    # xml = urllib2.urlopen(feed_url)
-    xml = open('/Users/bjornk/development/testing/testin.xml')
+    feed_url = "http://%s.tumblr.com/api/read" % tumblr_user
+    xml = urllib2.urlopen(feed_url)
     soup = BeautifulStoneSoup(xml)
     tumbls = soup.findAll('post')
     for tumbl in tumbls:
@@ -74,9 +73,14 @@ def populate_models(tumblr_user, user):
             m = Conversation(id=id, pub_date=pub_date, user=user, title=title)
             m.save()
             
+            try:
+                m.conversationline_set.all().delete()
+            except:
+                pass
+                
             lines = tumbl.find('conversation-text').contents[0].split('&#13;')
             for line in lines:
-                c = ConversationLine(conversation=m, line=line)
+                c = ConversationLine(conversation=m, line=line.strip())
                 c.save()
             
             
