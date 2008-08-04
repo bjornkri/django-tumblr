@@ -7,10 +7,13 @@ from tumblr import Api
 
 def get_user_api(username):
     user = settings.TUMBLR_USERS[username]
-    return Api(user['tumblr_user'] + ".tumblr.com",
-               user['email'],
-               user['password']
-               )
+    if user.has_key('email') and user.has_key('password'):
+        return Api(user['tumblr_user'] + ".tumblr.com",
+                   user['email'],
+                   user['password']
+                   )
+    else:
+        return False
 
 class Regular(models.Model):
     id = models.IntegerField(primary_key=True, editable=False)
@@ -26,9 +29,10 @@ class Regular(models.Model):
         
     def save(self):
         api = get_user_api(self.user.username)
-        if not self.id:
-            post = api.write_regular(title=self.title, body=self.body)
-            self.id = post['id']
+        if api:
+            if not self.id:
+                post = api.write_regular(title=self.title, body=self.body)
+                self.id = post['id']
         super(Regular, self).save()
     
     def __unicode__(self):
@@ -59,12 +63,13 @@ class Photo(models.Model):
 
     def save(self):
         api = get_user_api(self.user.username)
-        if not self.id:
-            if self.source:
-                post = api.write_photo(source=self.source, caption=self.caption, click_through_url=self.click_through_url)
-            elif self.photo:
-                post = api.write_photo(data=open(self.photo), caption=self.caption, click_through_url=self.click_through_url)
-            self.id = post['id']
+        if api:
+            if not self.id:
+                if self.source:
+                    post = api.write_photo(source=self.source, caption=self.caption, click_through_url=self.click_through_url)
+                elif self.photo:
+                    post = api.write_photo(data=open(self.photo), caption=self.caption, click_through_url=self.click_through_url)
+                self.id = post['id']
         super(Photo, self).save()
 
     def __unicode__(self):
@@ -90,9 +95,10 @@ class Quote(models.Model):
 
     def save(self):
         api = get_user_api(self.user.username)
-        if not self.id:
-            post = api.write_quote(quote=self.quote, source=self.source)
-            self.id = post['id']
+        if api:
+            if not self.id:
+                post = api.write_quote(quote=self.quote, source=self.source)
+                self.id = post['id']
         super(Quote, self).save()
 
     def __unicode__(self):
@@ -119,9 +125,10 @@ class Link(models.Model):
         
     def save(self):
         api = get_user_api(self.user.username)
-        if not self.id:
-            post = api.write_link(name=self.name, url=self.url, description=self.description)
-            self.id = post['id']
+        if api:
+            if not self.id:
+                post = api.write_link(name=self.name, url=self.url, description=self.description)
+                self.id = post['id']
         super(Link, self).save()
         
     def __unicode__(self):
@@ -154,9 +161,10 @@ class Conversation(models.Model):
         except:
             pass
         api = get_user_api(self.user.username)
-        if not self.id:
-            post = api.write_conversation(title=self.title, conversation=self.conversation_text)
-            self.id = post['id']        
+        if api:
+            if not self.id:
+                post = api.write_conversation(title=self.title, conversation=self.conversation_text)
+                self.id = post['id']        
         super(Conversation, self).save()
 
         lines = self.conversation_text.split('\n')
@@ -202,9 +210,10 @@ class Video(models.Model):
     
     def save(self):
         api = get_user_api(self.user.username)
-        if not self.id:
-            post = api.write_video(name=self.name, url=self.url, description=self.description)
-            self.id = post['id']
+        if api:
+            if not self.id:
+                post = api.write_video(name=self.name, url=self.url, description=self.description)
+                self.id = post['id']
         super(Video, self).save()
     
     def __unicode__(self):
@@ -233,9 +242,10 @@ class Audio(models.Model):
     
     def save(self):
         api = get_user_api(self.user.username)
-        if not self.id:
-            post = api.write_audio(name=self.name, url=self.url, description=self.description)
-            self.id = post['id']
+        if api:
+            if not self.id:
+                post = api.write_audio(name=self.name, url=self.url, description=self.description)
+                self.id = post['id']
         super(Audio, self).save()
         
     def __unicode__(self):
