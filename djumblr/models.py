@@ -5,8 +5,15 @@ from django.contrib.auth.models import User
 from django.db import models
 from tumblr import Api
 
+def get_user_api(username):
+    user = settings.TUMBLR_USERS[username]
+    return Api(user['tumblr_user'] + ".tumblr.com",
+               user['email'],
+               user['password']
+               )
+
 class Regular(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, editable=False)
     title = models.CharField(max_length=250, blank=True)
     body = models.TextField()
     
@@ -18,13 +25,9 @@ class Regular(models.Model):
         verbose_name_plural = "Regular"
         
     def save(self):
-        user = settings.TUMBLR_USERS[self.user.username]
-        api = Api(user['tumblr_user'] + ".tumblr.com",
-                  user['email'],
-                  user['password']
-        )
+        api = get_user_api(self.user.username)
         if not self.id:
-            post = api.write_regular(self.title, self.body)
+            post = api.write_regular(title=self.title, body=self.body)
             self.id = post['id']
         super(Regular, self).save()
     
@@ -48,20 +51,19 @@ class Photo(models.Model):
     caption = models.TextField(blank=True)
     click_through_url=models.URLField(blank=True)
 
-    pub_date = models.DateTimeField()
+    pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
     
     class Meta:
         ordering = ['-pub_date']
 
     def save(self):
-        user = settings.TUMBLR_USERS[self.user.username]
-        api = Api(user['tumblr_user'] + ".tumblr.com",
-                  user['email'],
-                  user['password']
-        )
+        api = get_user_api(self.user.username)
         if not self.id:
-            post = api.write_photo(source=self.source, caption=self.caption, click_through_url=self.click_through_url)
+            if self.source:
+                post = api.write_photo(source=self.source, caption=self.caption, click_through_url=self.click_through_url)
+            elif self.photo:
+                post = api.write_photo(data=open(self.photo), caption=self.caption, click_through_url=self.click_through_url)
             self.id = post['id']
         super(Photo, self).save()
 
@@ -87,11 +89,7 @@ class Quote(models.Model):
         ordering = ['-pub_date']
 
     def save(self):
-        user = settings.TUMBLR_USERS[self.user.username]
-        api = Api(user['tumblr_user'] + ".tumblr.com",
-                  user['email'],
-                  user['password']
-        )
+        api = get_user_api(self.user.username)
         if not self.id:
             post = api.write_quote(quote=self.quote, source=self.source)
             self.id = post['id']
@@ -108,7 +106,7 @@ class Quote(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
 
 class Link(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, editable=False)
     name = models.CharField(max_length=500, blank=True)
     url = models.URLField()
     description = models.TextField(blank=True)
@@ -120,11 +118,7 @@ class Link(models.Model):
         ordering = ['-pub_date']
         
     def save(self):
-        user = settings.TUMBLR_USERS[self.user.username]
-        api = Api(user['tumblr_user'] + ".tumblr.com",
-                  user['email'],
-                  user['password']
-        )
+        api = get_user_api(self.user.username)
         if not self.id:
             post = api.write_link(name=self.name, url=self.url, description=self.description)
             self.id = post['id']
@@ -144,15 +138,32 @@ class Link(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
 
 class Conversation(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, editable=False)
     title = models.CharField(max_length=500, blank=True)
-
+    conversation_text = models.TextField()
+    
     pub_date = models.DateTimeField(default=datetime.datetime.now)
     user = models.ForeignKey(User)
 
     class Meta:
         ordering = ['-pub_date']
 
+    def save(self):
+        try:
+            self.conversationline_set.all().delete()
+        except:
+            pass
+        api = get_user_api(self.user.username)
+        if not self.id:
+            post = api.write_conversation(title=self.title, conversation=self.conversation_text)
+            self.id = post['id']        
+        super(Conversation, self).save()
+
+        lines = self.conversation_text.split('\n')
+        for line in lines:
+            c = ConversationLine(conversation=self, line=line)
+            c.save()
+            
     def __unicode__(self):
         if self.title:
             return "%s (Conversation)" % self.title
@@ -177,7 +188,7 @@ class ConversationLine(models.Model):
         return self.line
     
 class Video(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, editable=False)
     embed = models.TextField(blank=True)
     data = models.FileField(blank=True, upload_to='/videos')
     title = models.CharField(blank=True, max_length=250)
@@ -188,6 +199,13 @@ class Video(models.Model):
     
     class Meta:
         ordering = ['-pub_date']        
+    
+    def save(self):
+        api = get_user_api(self.user.username)
+        if not self.id:
+            post = api.write_video(name=self.name, url=self.url, description=self.description)
+            self.id = post['id']
+        super(Video, self).save()
     
     def __unicode__(self):
         return "Video"
@@ -200,7 +218,7 @@ class Video(models.Model):
     get_absolute_url = models.permalink(get_absolute_url)
     
 class Audio(models.Model):
-    id = models.IntegerField(primary_key=True)
+    id = models.IntegerField(primary_key=True, editable=False)
     data = models.FileField(upload_to='/audio', blank=True)
     embed = models.TextField(blank=True)
     caption = models.TextField(blank=True)
@@ -213,6 +231,13 @@ class Audio(models.Model):
         ordering = ['-pub_date']
         verbose_name_plural = "Audio"
     
+    def save(self):
+        api = get_user_api(self.user.username)
+        if not self.id:
+            post = api.write_audio(name=self.name, url=self.url, description=self.description)
+            self.id = post['id']
+        super(Audio, self).save()
+        
     def __unicode__(self):
         return "Audio"
 

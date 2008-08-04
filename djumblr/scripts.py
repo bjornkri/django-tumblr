@@ -63,18 +63,8 @@ def populate_models(tumblr_user, user):
                 title = tumbl['conversation-title']
             else:
                 title = ""
-            m = Conversation(id=id, pub_date=pub_date, user=user, title=title)
+            m = Conversation(id=id, pub_date=pub_date, user=user, title=title, conversation_text=tumbl['conversation-text'])
             m.save()
-            
-            try:
-                m.conversationline_set.all().delete()
-            except:
-                pass
-                
-            lines = tumbl['conversation-text'].split('&#13;')
-            for line in lines:
-                c = ConversationLine(conversation=m, line=line.strip())
-                c.save()
             
             
         # 'Video' objects.
