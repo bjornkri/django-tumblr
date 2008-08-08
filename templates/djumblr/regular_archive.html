@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+	{% for year in date_list %}
+		<li><a href="{% url djumblr_regular_archive_year year|date:"Y" %}">{{ year|date:"Y" }}</a></li>
+	{% endfor %}
+</ul>
+{% endblock %}

@@ -3,6 +3,7 @@ import datetime
 from django.conf import settings
 from django.contrib.auth.models import User
 from django.db import models
+from django.template import loader, Context
 from tumblr import Api
 
 def get_user_api(username):
@@ -14,6 +15,11 @@ def get_user_api(username):
                    )
     else:
         return False
+        
+def display_tumbl(object, template):
+    t = loader.get_template(template)
+    c = Context({"object": object})
+    return t.render(c)
 
 class Regular(models.Model):
     id = models.IntegerField(primary_key=True, editable=False)
@@ -48,6 +54,9 @@ class Regular(models.Model):
                                                 'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
+    def shared_display(self):
+        return display_tumbl(self, "djumblr/display/regular.html")
+    
 class Photo(models.Model):
     id = models.IntegerField(primary_key=True, editable=False)
     source = models.URLField(blank=True)
@@ -81,6 +90,9 @@ class Photo(models.Model):
                                               'day': self.pub_date.strftime("%d"),
                                               'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
+    
+    def shared_display(self):
+        return display_tumbl(self, "djumblr/display/photo.html")
         
 class Quote(models.Model):
     id = models.IntegerField(primary_key=True, editable=False)
@@ -110,6 +122,9 @@ class Quote(models.Model):
                                               'day': self.pub_date.strftime("%d"),
                                               'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
+    
+    def shared_display(self):
+        return display_tumbl(self, "djumblr/display/quote.html")
 
 class Link(models.Model):
     id = models.IntegerField(primary_key=True, editable=False)
@@ -143,7 +158,10 @@ class Link(models.Model):
                                              'day': self.pub_date.strftime("%d"),
                                              'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
-
+    
+    def shared_display(self):
+        return display_tumbl(self, "djumblr/display/link.html")
+        
 class Conversation(models.Model):
     id = models.IntegerField(primary_key=True, editable=False)
     title = models.CharField(max_length=500, blank=True)
@@ -184,6 +202,9 @@ class Conversation(models.Model):
                                                      'day': self.pub_date.strftime("%d"),
                                                      'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
+    
+    def shared_display(self):
+        return display_tumbl(self, "djumblr/display/conversation.html")
         
 class ConversationLine(models.Model):
     line = models.CharField(max_length=250, core=True)
@@ -226,6 +247,9 @@ class Video(models.Model):
                                               'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
+    def shared_display(self):
+        return display_tumbl(self, "djumblr/display/video.html")
+    
 class Audio(models.Model):
     id = models.IntegerField(primary_key=True, editable=False)
     data = models.FileField(upload_to='/audio', blank=True)
@@ -257,3 +281,6 @@ class Audio(models.Model):
                                               'day': self.pub_date.strftime("%d"),
                                               'id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
+    
+    def shared_display(self):
+        return display_tumbl(self, "djumblr/display/video.html")

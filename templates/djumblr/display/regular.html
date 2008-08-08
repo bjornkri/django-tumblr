@@ -1,0 +1,8 @@
+<div class="title type_regular">
+	{% if object.title %}
+	<h2><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></h2>
+	{% else %}
+	&nbsp;
+	{% endif %}
+</div>
+{{ object.body|safe }}
