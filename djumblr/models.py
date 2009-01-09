@@ -207,7 +207,7 @@ class Conversation(models.Model):
         return display_tumbl(self, "djumblr/display/conversation.html")
         
 class ConversationLine(models.Model):
-    line = models.CharField(max_length=250, core=True)
+    line = models.CharField(max_length=250)
     conversation = models.ForeignKey(Conversation)
     
     class Meta:
