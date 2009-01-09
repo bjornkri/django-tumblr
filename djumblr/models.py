@@ -51,7 +51,7 @@ class Regular(models.Model):
         return ('djumblr_regular_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                                 'month': self.pub_date.strftime("%b").lower(),
                                                 'day': self.pub_date.strftime("%d"),
-                                                'id': self.id })
+                                                'object_id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
     def shared_display(self):
@@ -88,7 +88,7 @@ class Photo(models.Model):
         return ('djumblr_photo_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                               'month': self.pub_date.strftime("%b").lower(),
                                               'day': self.pub_date.strftime("%d"),
-                                              'id': self.id })
+                                              'object_id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
     def shared_display(self):
@@ -120,7 +120,7 @@ class Quote(models.Model):
         return ('djumblr_quote_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                               'month': self.pub_date.strftime("%b").lower(),
                                               'day': self.pub_date.strftime("%d"),
-                                              'id': self.id })
+                                              'object_id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
     def shared_display(self):
@@ -156,7 +156,7 @@ class Link(models.Model):
         return ('djumblr_link_detail', (), { 'year': self.pub_date.strftime("%Y"),
                                              'month': self.pub_date.strftime("%b").lower(),
                                              'day': self.pub_date.strftime("%d"),
-                                             'id': self.id })
+                                             'object_id': self.id })
     get_absolute_url = models.permalink(get_absolute_url)
     
     def shared_display(self):

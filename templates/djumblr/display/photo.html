@@ -1,0 +1,13 @@
+<div class="title type_photo">
+	{% if object.title %}
+	<h2><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></h2>
+	{% else %}
+	<h2><a href="{{ object.get_absolute_url }}">Photo</a></h2>
+	{% endif %}
+</div>
+{% if object.click_through_url %}
+<p><a href="{{ object.click_through_url }}"><img src="{{ object.source }}"></a></p>
+{% else %}
+<p><img src="{{ object.source }}"></p>
+{% endif %}
+<p>{{ object.caption|safe }}</p>

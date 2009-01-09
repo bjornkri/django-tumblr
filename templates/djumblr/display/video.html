@@ -1,0 +1,9 @@
+<div class="title type_quote">
+	{% if object.title %}
+	<h2><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></h2>
+	{% else %}
+	<h2><a href="{{ object.get_absolute_url }}">Video</a></h2>
+	{% endif %}
+</div>
+<p>{{ object.embed|safe }}</p>
+<p>{{ object.caption|safe }}</p>

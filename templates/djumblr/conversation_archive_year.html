@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block content %}
+<ul>
+	{% for month in date_list %}
+		<li><a href="{% url djumblr_conversation_archive_month year,month|date:"b" %}">{{ month|date:"F" }}</a></li>
+	{% endfor %}
+</ul>
+{% endblock %}

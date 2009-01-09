@@ -1,0 +1,9 @@
+<div class="title type_link">
+	{% if object.name %}
+	<h2><a href="{{ object.get_absolute_url }}">{{ object.name }}</a></h2>
+	{% else %}
+	<h2><a href="{{ object.get_absolute_url }}">Link</a></h2>
+	{% endif %}
+</div>
+<p>{{ object.description|safe }}</p>
+<p><a href="{{ object.url }}">Visit link</a>

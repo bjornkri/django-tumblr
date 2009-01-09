@@ -2,7 +2,7 @@
 	{% if object.title %}
 	<h2><a href="{{ object.get_absolute_url }}">{{ object.title }}</a></h2>
 	{% else %}
-	&nbsp;
+	<h2><a href="{{ object.get_absolute_url }}">No title</a></h2>
 	{% endif %}
 </div>
-{{ object.body|safe }}
+<p>{{ object.body|safe }}</p>
